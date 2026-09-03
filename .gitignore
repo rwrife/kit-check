@@ -1,0 +1,23 @@
+# Flutter and Dart tool output
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+
+# Platform-generated files
+android/.gradle/
+android/local.properties
+ios/Pods/
+ios/.symlinks/
+macos/Pods/
+
+# IDE and local settings
+.idea/
+.vscode/
+*.iml
+
+# User-created exports and backups
+exports/
+backups/
