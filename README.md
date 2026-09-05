@@ -49,20 +49,25 @@ The app will support screen-reader labels, keyboard/switch navigation where the 
 
 ## Status and milestones
 
-This repository currently contains product documentation and an implementation backlog only.
+The repository now contains the Flutter foundation for Android and iOS, a local-only startup configuration, and baseline domain + widget tests. Remaining milestones:
 
-1. Create the Flutter project, domain model, and tests.
-2. Implement kits and trip checklist snapshots.
-3. Add accessible workflows, local export/backup, and release packaging.
+1. Implement Drift-backed local persistence and kit CRUD.
+2. Add trip snapshot workflows and return-state transitions in UI.
+3. Add export/backup/restore and release-readiness validation.
 
 ## Development quickstart
 
-The planned stack is Flutter/Dart with Drift over SQLite. Once the project skeleton lands:
-
 ```sh
 flutter pub get
+flutter analyze
 flutter test
 flutter run
 ```
 
-No application source or build artifact exists yet.
+## CI quality gate
+
+GitHub Actions runs:
+
+- `dart format --output=none --set-exit-if-changed lib test`
+- `flutter analyze`
+- `flutter test`
