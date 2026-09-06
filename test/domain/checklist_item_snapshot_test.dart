@@ -31,6 +31,14 @@ void main() {
       expect(omitted.isUnresolved, isTrue);
     });
 
+    test('omitted item can be packed and clears omission note', () {
+      final packed = base.omit('using hotel item').markPacked();
+
+      expect(packed.status, ChecklistStatus.packed);
+      expect(packed.omissionNote, isNull);
+      expect(packed.isUnresolved, isTrue);
+    });
+
     test('returned item cannot be mutated back to pending or packed', () {
       final returned = base.markPacked().markReturned();
 

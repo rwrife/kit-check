@@ -37,6 +37,30 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
   }
 
   @override
+  Future<model.TripChecklistSnapshot> createTrip({
+    required model.KitId kitId,
+    required String tripName,
+    String? tripNote,
+    DateTime? startedOn,
+  }) async {
+    final kit = await _loadKitById(kitId);
+    if (kit == null) {
+      throw StateError('Kit not found: ${kitId.value}');
+    }
+
+    final trip = model.TripChecklistSnapshot.fromKitTemplate(
+      id: model.TripId(_idFactory('trip')),
+      kit: kit,
+      tripName: tripName,
+      tripNote: tripNote,
+      startedOn: startedOn ?? _clock(),
+    );
+
+    await saveTrip(trip);
+    return trip;
+  }
+
+  @override
   Future<void> deleteKit(model.KitId id) async {
     await (_database.delete(
       _database.kits,
@@ -115,6 +139,30 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
   }
 
   @override
+  Future<model.TripChecklistSnapshot?> loadTrip(model.TripId id) async {
+    final row = await (_database.select(
+      _database.trips,
+    )..where((tbl) => tbl.id.equals(id.value))).getSingleOrNull();
+    if (row == null) {
+      return null;
+    }
+    return _loadTripGraph(row);
+  }
+
+  @override
+  Future<List<model.TripChecklistSnapshot>> loadTrips() async {
+    final rows =
+        await (_database.select(_database.trips)
+              ..orderBy(<OrderingTerm Function($TripsTable)>[
+                (tbl) => OrderingTerm.desc(tbl.startedOnMs),
+                (tbl) => OrderingTerm.asc(tbl.id),
+              ]))
+            .get();
+
+    return Future.wait(rows.map(_loadTripGraph), eagerError: true);
+  }
+
+  @override
   Future<void> renameKit(model.KitId id, String name) async {
     final normalized = model.KitTemplate(id: id, name: name);
     final rows =
@@ -182,6 +230,59 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
                   quantity: Value(item.quantity),
                   note: Value(item.note),
                   categoryId: Value(item.categoryId?.value),
+                ),
+              )
+              .toList(growable: false),
+        );
+      });
+    });
+  }
+
+  @override
+  Future<void> saveTrip(model.TripChecklistSnapshot trip) async {
+    _validateTrip(trip);
+
+    await _database.transaction(() async {
+      final existing = await (_database.select(
+        _database.trips,
+      )..where((tbl) => tbl.id.equals(trip.id.value))).getSingleOrNull();
+
+      await _database
+          .into(_database.trips)
+          .insertOnConflictUpdate(
+            TripsCompanion.insert(
+              id: trip.id.value,
+              sourceKitId: trip.kitId.value,
+              sourceKitName: trip.kitName,
+              tripName: trip.tripName,
+              tripNote: Value(trip.tripNote),
+              startedOnMs: trip.startedOn.toUtc().millisecondsSinceEpoch,
+              createdAtMs:
+                  existing?.createdAtMs ?? _clock().millisecondsSinceEpoch,
+            ),
+          );
+
+      await (_database.delete(
+        _database.tripChecklistItems,
+      )..where((tbl) => tbl.tripId.equals(trip.id.value))).go();
+
+      await _database.batch((batch) {
+        batch.insertAll(
+          _database.tripChecklistItems,
+          trip.items
+              .asMap()
+              .entries
+              .map(
+                (entry) => TripChecklistItemsCompanion.insert(
+                  tripId: trip.id.value,
+                  itemId: entry.value.itemId.value,
+                  itemName: entry.value.itemName,
+                  quantity: Value(entry.value.quantity),
+                  note: Value(entry.value.note),
+                  categoryName: Value(entry.value.categoryName),
+                  status: _encodeStatus(entry.value.status),
+                  omissionNote: Value(entry.value.omissionNote),
+                  sortOrder: entry.key,
                 ),
               )
               .toList(growable: false),
@@ -274,6 +375,95 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
       items: items,
       isArchived: kitRow.isArchived,
     );
+  }
+
+  Future<model.TripChecklistSnapshot> _loadTripGraph(Trip row) async {
+    final itemRows =
+        await (_database.select(_database.tripChecklistItems)
+              ..where((tbl) => tbl.tripId.equals(row.id))
+              ..orderBy(<OrderingTerm Function($TripChecklistItemsTable)>[
+                (tbl) => OrderingTerm.asc(tbl.sortOrder),
+                (tbl) => OrderingTerm.asc(tbl.itemName.lower()),
+                (tbl) => OrderingTerm.asc(tbl.itemId),
+              ]))
+            .get();
+
+    final items = itemRows
+        .map(
+          (itemRow) => model.ChecklistItemSnapshot(
+            itemId: model.ItemId(itemRow.itemId),
+            itemName: itemRow.itemName,
+            quantity: itemRow.quantity,
+            note: itemRow.note,
+            categoryName: itemRow.categoryName,
+            status: _decodeStatus(itemRow.status),
+            omissionNote: itemRow.omissionNote,
+          ),
+        )
+        .toList(growable: false);
+
+    final trip = model.TripChecklistSnapshot(
+      id: model.TripId(row.id),
+      kitId: model.KitId(row.sourceKitId),
+      kitName: row.sourceKitName,
+      tripName: row.tripName,
+      tripNote: row.tripNote,
+      startedOn: DateTime.fromMillisecondsSinceEpoch(
+        row.startedOnMs,
+        isUtc: true,
+      ),
+      items: items,
+    );
+
+    _validateTrip(trip);
+    return trip;
+  }
+
+  static String _encodeStatus(model.ChecklistStatus status) {
+    return switch (status) {
+      model.ChecklistStatus.pending => 'pending',
+      model.ChecklistStatus.packed => 'packed',
+      model.ChecklistStatus.omitted => 'omitted',
+      model.ChecklistStatus.returned => 'returned',
+    };
+  }
+
+  static model.ChecklistStatus _decodeStatus(String value) {
+    return switch (value) {
+      'pending' => model.ChecklistStatus.pending,
+      'packed' => model.ChecklistStatus.packed,
+      'omitted' => model.ChecklistStatus.omitted,
+      'returned' => model.ChecklistStatus.returned,
+      _ => throw StateError('Unknown checklist status: $value'),
+    };
+  }
+
+  static void _validateTrip(model.TripChecklistSnapshot trip) {
+    for (final item in trip.items) {
+      switch (item.status) {
+        case model.ChecklistStatus.pending:
+        case model.ChecklistStatus.packed:
+        case model.ChecklistStatus.returned:
+          if (item.omissionNote != null) {
+            throw ArgumentError.value(
+              item.omissionNote,
+              'omissionNote',
+              'Only omitted items can include an omission note',
+            );
+          }
+          break;
+        case model.ChecklistStatus.omitted:
+          final note = item.omissionNote?.trim();
+          if (note == null || note.isEmpty) {
+            throw ArgumentError.value(
+              item.omissionNote,
+              'omissionNote',
+              'Omitted items require an omission note',
+            );
+          }
+          break;
+      }
+    }
   }
 
   static int _categoryComparator(

@@ -1086,12 +1086,1072 @@ class KitItemsCompanion extends UpdateCompanion<KitItem> {
   }
 }
 
+class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TripsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceKitIdMeta = const VerificationMeta(
+    'sourceKitId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceKitId = GeneratedColumn<String>(
+    'source_kit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceKitNameMeta = const VerificationMeta(
+    'sourceKitName',
+  );
+  @override
+  late final GeneratedColumn<String> sourceKitName = GeneratedColumn<String>(
+    'source_kit_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tripNameMeta = const VerificationMeta(
+    'tripName',
+  );
+  @override
+  late final GeneratedColumn<String> tripName = GeneratedColumn<String>(
+    'trip_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tripNoteMeta = const VerificationMeta(
+    'tripNote',
+  );
+  @override
+  late final GeneratedColumn<String> tripNote = GeneratedColumn<String>(
+    'trip_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startedOnMsMeta = const VerificationMeta(
+    'startedOnMs',
+  );
+  @override
+  late final GeneratedColumn<int> startedOnMs = GeneratedColumn<int>(
+    'started_on_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMsMeta = const VerificationMeta(
+    'createdAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtMs = GeneratedColumn<int>(
+    'created_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sourceKitId,
+    sourceKitName,
+    tripName,
+    tripNote,
+    startedOnMs,
+    createdAtMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trips';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Trip> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('source_kit_id')) {
+      context.handle(
+        _sourceKitIdMeta,
+        sourceKitId.isAcceptableOrUnknown(
+          data['source_kit_id']!,
+          _sourceKitIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceKitIdMeta);
+    }
+    if (data.containsKey('source_kit_name')) {
+      context.handle(
+        _sourceKitNameMeta,
+        sourceKitName.isAcceptableOrUnknown(
+          data['source_kit_name']!,
+          _sourceKitNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceKitNameMeta);
+    }
+    if (data.containsKey('trip_name')) {
+      context.handle(
+        _tripNameMeta,
+        tripName.isAcceptableOrUnknown(data['trip_name']!, _tripNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tripNameMeta);
+    }
+    if (data.containsKey('trip_note')) {
+      context.handle(
+        _tripNoteMeta,
+        tripNote.isAcceptableOrUnknown(data['trip_note']!, _tripNoteMeta),
+      );
+    }
+    if (data.containsKey('started_on_ms')) {
+      context.handle(
+        _startedOnMsMeta,
+        startedOnMs.isAcceptableOrUnknown(
+          data['started_on_ms']!,
+          _startedOnMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startedOnMsMeta);
+    }
+    if (data.containsKey('created_at_ms')) {
+      context.handle(
+        _createdAtMsMeta,
+        createdAtMs.isAcceptableOrUnknown(
+          data['created_at_ms']!,
+          _createdAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Trip map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Trip(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      sourceKitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_kit_id'],
+      )!,
+      sourceKitName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_kit_name'],
+      )!,
+      tripName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trip_name'],
+      )!,
+      tripNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trip_note'],
+      ),
+      startedOnMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}started_on_ms'],
+      )!,
+      createdAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $TripsTable createAlias(String alias) {
+    return $TripsTable(attachedDatabase, alias);
+  }
+}
+
+class Trip extends DataClass implements Insertable<Trip> {
+  final String id;
+  final String sourceKitId;
+  final String sourceKitName;
+  final String tripName;
+  final String? tripNote;
+  final int startedOnMs;
+  final int createdAtMs;
+  const Trip({
+    required this.id,
+    required this.sourceKitId,
+    required this.sourceKitName,
+    required this.tripName,
+    this.tripNote,
+    required this.startedOnMs,
+    required this.createdAtMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['source_kit_id'] = Variable<String>(sourceKitId);
+    map['source_kit_name'] = Variable<String>(sourceKitName);
+    map['trip_name'] = Variable<String>(tripName);
+    if (!nullToAbsent || tripNote != null) {
+      map['trip_note'] = Variable<String>(tripNote);
+    }
+    map['started_on_ms'] = Variable<int>(startedOnMs);
+    map['created_at_ms'] = Variable<int>(createdAtMs);
+    return map;
+  }
+
+  TripsCompanion toCompanion(bool nullToAbsent) {
+    return TripsCompanion(
+      id: Value(id),
+      sourceKitId: Value(sourceKitId),
+      sourceKitName: Value(sourceKitName),
+      tripName: Value(tripName),
+      tripNote: tripNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tripNote),
+      startedOnMs: Value(startedOnMs),
+      createdAtMs: Value(createdAtMs),
+    );
+  }
+
+  factory Trip.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Trip(
+      id: serializer.fromJson<String>(json['id']),
+      sourceKitId: serializer.fromJson<String>(json['sourceKitId']),
+      sourceKitName: serializer.fromJson<String>(json['sourceKitName']),
+      tripName: serializer.fromJson<String>(json['tripName']),
+      tripNote: serializer.fromJson<String?>(json['tripNote']),
+      startedOnMs: serializer.fromJson<int>(json['startedOnMs']),
+      createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sourceKitId': serializer.toJson<String>(sourceKitId),
+      'sourceKitName': serializer.toJson<String>(sourceKitName),
+      'tripName': serializer.toJson<String>(tripName),
+      'tripNote': serializer.toJson<String?>(tripNote),
+      'startedOnMs': serializer.toJson<int>(startedOnMs),
+      'createdAtMs': serializer.toJson<int>(createdAtMs),
+    };
+  }
+
+  Trip copyWith({
+    String? id,
+    String? sourceKitId,
+    String? sourceKitName,
+    String? tripName,
+    Value<String?> tripNote = const Value.absent(),
+    int? startedOnMs,
+    int? createdAtMs,
+  }) => Trip(
+    id: id ?? this.id,
+    sourceKitId: sourceKitId ?? this.sourceKitId,
+    sourceKitName: sourceKitName ?? this.sourceKitName,
+    tripName: tripName ?? this.tripName,
+    tripNote: tripNote.present ? tripNote.value : this.tripNote,
+    startedOnMs: startedOnMs ?? this.startedOnMs,
+    createdAtMs: createdAtMs ?? this.createdAtMs,
+  );
+  Trip copyWithCompanion(TripsCompanion data) {
+    return Trip(
+      id: data.id.present ? data.id.value : this.id,
+      sourceKitId: data.sourceKitId.present
+          ? data.sourceKitId.value
+          : this.sourceKitId,
+      sourceKitName: data.sourceKitName.present
+          ? data.sourceKitName.value
+          : this.sourceKitName,
+      tripName: data.tripName.present ? data.tripName.value : this.tripName,
+      tripNote: data.tripNote.present ? data.tripNote.value : this.tripNote,
+      startedOnMs: data.startedOnMs.present
+          ? data.startedOnMs.value
+          : this.startedOnMs,
+      createdAtMs: data.createdAtMs.present
+          ? data.createdAtMs.value
+          : this.createdAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Trip(')
+          ..write('id: $id, ')
+          ..write('sourceKitId: $sourceKitId, ')
+          ..write('sourceKitName: $sourceKitName, ')
+          ..write('tripName: $tripName, ')
+          ..write('tripNote: $tripNote, ')
+          ..write('startedOnMs: $startedOnMs, ')
+          ..write('createdAtMs: $createdAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sourceKitId,
+    sourceKitName,
+    tripName,
+    tripNote,
+    startedOnMs,
+    createdAtMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Trip &&
+          other.id == this.id &&
+          other.sourceKitId == this.sourceKitId &&
+          other.sourceKitName == this.sourceKitName &&
+          other.tripName == this.tripName &&
+          other.tripNote == this.tripNote &&
+          other.startedOnMs == this.startedOnMs &&
+          other.createdAtMs == this.createdAtMs);
+}
+
+class TripsCompanion extends UpdateCompanion<Trip> {
+  final Value<String> id;
+  final Value<String> sourceKitId;
+  final Value<String> sourceKitName;
+  final Value<String> tripName;
+  final Value<String?> tripNote;
+  final Value<int> startedOnMs;
+  final Value<int> createdAtMs;
+  final Value<int> rowid;
+  const TripsCompanion({
+    this.id = const Value.absent(),
+    this.sourceKitId = const Value.absent(),
+    this.sourceKitName = const Value.absent(),
+    this.tripName = const Value.absent(),
+    this.tripNote = const Value.absent(),
+    this.startedOnMs = const Value.absent(),
+    this.createdAtMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TripsCompanion.insert({
+    required String id,
+    required String sourceKitId,
+    required String sourceKitName,
+    required String tripName,
+    this.tripNote = const Value.absent(),
+    required int startedOnMs,
+    required int createdAtMs,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       sourceKitId = Value(sourceKitId),
+       sourceKitName = Value(sourceKitName),
+       tripName = Value(tripName),
+       startedOnMs = Value(startedOnMs),
+       createdAtMs = Value(createdAtMs);
+  static Insertable<Trip> custom({
+    Expression<String>? id,
+    Expression<String>? sourceKitId,
+    Expression<String>? sourceKitName,
+    Expression<String>? tripName,
+    Expression<String>? tripNote,
+    Expression<int>? startedOnMs,
+    Expression<int>? createdAtMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sourceKitId != null) 'source_kit_id': sourceKitId,
+      if (sourceKitName != null) 'source_kit_name': sourceKitName,
+      if (tripName != null) 'trip_name': tripName,
+      if (tripNote != null) 'trip_note': tripNote,
+      if (startedOnMs != null) 'started_on_ms': startedOnMs,
+      if (createdAtMs != null) 'created_at_ms': createdAtMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TripsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? sourceKitId,
+    Value<String>? sourceKitName,
+    Value<String>? tripName,
+    Value<String?>? tripNote,
+    Value<int>? startedOnMs,
+    Value<int>? createdAtMs,
+    Value<int>? rowid,
+  }) {
+    return TripsCompanion(
+      id: id ?? this.id,
+      sourceKitId: sourceKitId ?? this.sourceKitId,
+      sourceKitName: sourceKitName ?? this.sourceKitName,
+      tripName: tripName ?? this.tripName,
+      tripNote: tripNote ?? this.tripNote,
+      startedOnMs: startedOnMs ?? this.startedOnMs,
+      createdAtMs: createdAtMs ?? this.createdAtMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sourceKitId.present) {
+      map['source_kit_id'] = Variable<String>(sourceKitId.value);
+    }
+    if (sourceKitName.present) {
+      map['source_kit_name'] = Variable<String>(sourceKitName.value);
+    }
+    if (tripName.present) {
+      map['trip_name'] = Variable<String>(tripName.value);
+    }
+    if (tripNote.present) {
+      map['trip_note'] = Variable<String>(tripNote.value);
+    }
+    if (startedOnMs.present) {
+      map['started_on_ms'] = Variable<int>(startedOnMs.value);
+    }
+    if (createdAtMs.present) {
+      map['created_at_ms'] = Variable<int>(createdAtMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TripsCompanion(')
+          ..write('id: $id, ')
+          ..write('sourceKitId: $sourceKitId, ')
+          ..write('sourceKitName: $sourceKitName, ')
+          ..write('tripName: $tripName, ')
+          ..write('tripNote: $tripNote, ')
+          ..write('startedOnMs: $startedOnMs, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TripChecklistItemsTable extends TripChecklistItems
+    with TableInfo<$TripChecklistItemsTable, TripChecklistItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TripChecklistItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _tripIdMeta = const VerificationMeta('tripId');
+  @override
+  late final GeneratedColumn<String> tripId = GeneratedColumn<String>(
+    'trip_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES trips (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemNameMeta = const VerificationMeta(
+    'itemName',
+  );
+  @override
+  late final GeneratedColumn<String> itemName = GeneratedColumn<String>(
+    'item_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryNameMeta = const VerificationMeta(
+    'categoryName',
+  );
+  @override
+  late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
+    'category_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _omissionNoteMeta = const VerificationMeta(
+    'omissionNote',
+  );
+  @override
+  late final GeneratedColumn<String> omissionNote = GeneratedColumn<String>(
+    'omission_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    tripId,
+    itemId,
+    itemName,
+    quantity,
+    note,
+    categoryName,
+    status,
+    omissionNote,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trip_checklist_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TripChecklistItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('trip_id')) {
+      context.handle(
+        _tripIdMeta,
+        tripId.isAcceptableOrUnknown(data['trip_id']!, _tripIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tripIdMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('item_name')) {
+      context.handle(
+        _itemNameMeta,
+        itemName.isAcceptableOrUnknown(data['item_name']!, _itemNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemNameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('category_name')) {
+      context.handle(
+        _categoryNameMeta,
+        categoryName.isAcceptableOrUnknown(
+          data['category_name']!,
+          _categoryNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('omission_note')) {
+      context.handle(
+        _omissionNoteMeta,
+        omissionNote.isAcceptableOrUnknown(
+          data['omission_note']!,
+          _omissionNoteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {tripId, itemId};
+  @override
+  TripChecklistItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TripChecklistItem(
+      tripId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trip_id'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+      itemName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_name'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      categoryName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_name'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      omissionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}omission_note'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $TripChecklistItemsTable createAlias(String alias) {
+    return $TripChecklistItemsTable(attachedDatabase, alias);
+  }
+}
+
+class TripChecklistItem extends DataClass
+    implements Insertable<TripChecklistItem> {
+  final String tripId;
+  final String itemId;
+  final String itemName;
+  final int? quantity;
+  final String? note;
+  final String? categoryName;
+  final String status;
+  final String? omissionNote;
+  final int sortOrder;
+  const TripChecklistItem({
+    required this.tripId,
+    required this.itemId,
+    required this.itemName,
+    this.quantity,
+    this.note,
+    this.categoryName,
+    required this.status,
+    this.omissionNote,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['trip_id'] = Variable<String>(tripId);
+    map['item_id'] = Variable<String>(itemId);
+    map['item_name'] = Variable<String>(itemName);
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<int>(quantity);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || categoryName != null) {
+      map['category_name'] = Variable<String>(categoryName);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || omissionNote != null) {
+      map['omission_note'] = Variable<String>(omissionNote);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  TripChecklistItemsCompanion toCompanion(bool nullToAbsent) {
+    return TripChecklistItemsCompanion(
+      tripId: Value(tripId),
+      itemId: Value(itemId),
+      itemName: Value(itemName),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      categoryName: categoryName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryName),
+      status: Value(status),
+      omissionNote: omissionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(omissionNote),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory TripChecklistItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TripChecklistItem(
+      tripId: serializer.fromJson<String>(json['tripId']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+      itemName: serializer.fromJson<String>(json['itemName']),
+      quantity: serializer.fromJson<int?>(json['quantity']),
+      note: serializer.fromJson<String?>(json['note']),
+      categoryName: serializer.fromJson<String?>(json['categoryName']),
+      status: serializer.fromJson<String>(json['status']),
+      omissionNote: serializer.fromJson<String?>(json['omissionNote']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tripId': serializer.toJson<String>(tripId),
+      'itemId': serializer.toJson<String>(itemId),
+      'itemName': serializer.toJson<String>(itemName),
+      'quantity': serializer.toJson<int?>(quantity),
+      'note': serializer.toJson<String?>(note),
+      'categoryName': serializer.toJson<String?>(categoryName),
+      'status': serializer.toJson<String>(status),
+      'omissionNote': serializer.toJson<String?>(omissionNote),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  TripChecklistItem copyWith({
+    String? tripId,
+    String? itemId,
+    String? itemName,
+    Value<int?> quantity = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<String?> categoryName = const Value.absent(),
+    String? status,
+    Value<String?> omissionNote = const Value.absent(),
+    int? sortOrder,
+  }) => TripChecklistItem(
+    tripId: tripId ?? this.tripId,
+    itemId: itemId ?? this.itemId,
+    itemName: itemName ?? this.itemName,
+    quantity: quantity.present ? quantity.value : this.quantity,
+    note: note.present ? note.value : this.note,
+    categoryName: categoryName.present ? categoryName.value : this.categoryName,
+    status: status ?? this.status,
+    omissionNote: omissionNote.present ? omissionNote.value : this.omissionNote,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  TripChecklistItem copyWithCompanion(TripChecklistItemsCompanion data) {
+    return TripChecklistItem(
+      tripId: data.tripId.present ? data.tripId.value : this.tripId,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      itemName: data.itemName.present ? data.itemName.value : this.itemName,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      note: data.note.present ? data.note.value : this.note,
+      categoryName: data.categoryName.present
+          ? data.categoryName.value
+          : this.categoryName,
+      status: data.status.present ? data.status.value : this.status,
+      omissionNote: data.omissionNote.present
+          ? data.omissionNote.value
+          : this.omissionNote,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TripChecklistItem(')
+          ..write('tripId: $tripId, ')
+          ..write('itemId: $itemId, ')
+          ..write('itemName: $itemName, ')
+          ..write('quantity: $quantity, ')
+          ..write('note: $note, ')
+          ..write('categoryName: $categoryName, ')
+          ..write('status: $status, ')
+          ..write('omissionNote: $omissionNote, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    tripId,
+    itemId,
+    itemName,
+    quantity,
+    note,
+    categoryName,
+    status,
+    omissionNote,
+    sortOrder,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TripChecklistItem &&
+          other.tripId == this.tripId &&
+          other.itemId == this.itemId &&
+          other.itemName == this.itemName &&
+          other.quantity == this.quantity &&
+          other.note == this.note &&
+          other.categoryName == this.categoryName &&
+          other.status == this.status &&
+          other.omissionNote == this.omissionNote &&
+          other.sortOrder == this.sortOrder);
+}
+
+class TripChecklistItemsCompanion extends UpdateCompanion<TripChecklistItem> {
+  final Value<String> tripId;
+  final Value<String> itemId;
+  final Value<String> itemName;
+  final Value<int?> quantity;
+  final Value<String?> note;
+  final Value<String?> categoryName;
+  final Value<String> status;
+  final Value<String?> omissionNote;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const TripChecklistItemsCompanion({
+    this.tripId = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.itemName = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.note = const Value.absent(),
+    this.categoryName = const Value.absent(),
+    this.status = const Value.absent(),
+    this.omissionNote = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TripChecklistItemsCompanion.insert({
+    required String tripId,
+    required String itemId,
+    required String itemName,
+    this.quantity = const Value.absent(),
+    this.note = const Value.absent(),
+    this.categoryName = const Value.absent(),
+    required String status,
+    this.omissionNote = const Value.absent(),
+    required int sortOrder,
+    this.rowid = const Value.absent(),
+  }) : tripId = Value(tripId),
+       itemId = Value(itemId),
+       itemName = Value(itemName),
+       status = Value(status),
+       sortOrder = Value(sortOrder);
+  static Insertable<TripChecklistItem> custom({
+    Expression<String>? tripId,
+    Expression<String>? itemId,
+    Expression<String>? itemName,
+    Expression<int>? quantity,
+    Expression<String>? note,
+    Expression<String>? categoryName,
+    Expression<String>? status,
+    Expression<String>? omissionNote,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (tripId != null) 'trip_id': tripId,
+      if (itemId != null) 'item_id': itemId,
+      if (itemName != null) 'item_name': itemName,
+      if (quantity != null) 'quantity': quantity,
+      if (note != null) 'note': note,
+      if (categoryName != null) 'category_name': categoryName,
+      if (status != null) 'status': status,
+      if (omissionNote != null) 'omission_note': omissionNote,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TripChecklistItemsCompanion copyWith({
+    Value<String>? tripId,
+    Value<String>? itemId,
+    Value<String>? itemName,
+    Value<int?>? quantity,
+    Value<String?>? note,
+    Value<String?>? categoryName,
+    Value<String>? status,
+    Value<String?>? omissionNote,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return TripChecklistItemsCompanion(
+      tripId: tripId ?? this.tripId,
+      itemId: itemId ?? this.itemId,
+      itemName: itemName ?? this.itemName,
+      quantity: quantity ?? this.quantity,
+      note: note ?? this.note,
+      categoryName: categoryName ?? this.categoryName,
+      status: status ?? this.status,
+      omissionNote: omissionNote ?? this.omissionNote,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (tripId.present) {
+      map['trip_id'] = Variable<String>(tripId.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (itemName.present) {
+      map['item_name'] = Variable<String>(itemName.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (categoryName.present) {
+      map['category_name'] = Variable<String>(categoryName.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (omissionNote.present) {
+      map['omission_note'] = Variable<String>(omissionNote.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TripChecklistItemsCompanion(')
+          ..write('tripId: $tripId, ')
+          ..write('itemId: $itemId, ')
+          ..write('itemName: $itemName, ')
+          ..write('quantity: $quantity, ')
+          ..write('note: $note, ')
+          ..write('categoryName: $categoryName, ')
+          ..write('status: $status, ')
+          ..write('omissionNote: $omissionNote, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$LocalDatabase extends GeneratedDatabase {
   _$LocalDatabase(QueryExecutor e) : super(e);
   $LocalDatabaseManager get managers => $LocalDatabaseManager(this);
   late final $KitsTable kits = $KitsTable(this);
   late final $KitCategoriesTable kitCategories = $KitCategoriesTable(this);
   late final $KitItemsTable kitItems = $KitItemsTable(this);
+  late final $TripsTable trips = $TripsTable(this);
+  late final $TripChecklistItemsTable tripChecklistItems =
+      $TripChecklistItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1100,6 +2160,8 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
     kits,
     kitCategories,
     kitItems,
+    trips,
+    tripChecklistItems,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1123,6 +2185,13 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('kit_items', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'trips',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('trip_checklist_items', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2321,6 +3390,767 @@ typedef $$KitItemsTableProcessedTableManager =
       KitItem,
       PrefetchHooks Function({bool kitId, bool categoryId})
     >;
+typedef $$TripsTableCreateCompanionBuilder = TripsCompanion Function({
+  required String id,
+  required String sourceKitId,
+  required String sourceKitName,
+  required String tripName,
+  Value<String?> tripNote,
+  required int startedOnMs,
+  required int createdAtMs,
+  Value<int> rowid,
+});
+typedef $$TripsTableUpdateCompanionBuilder = TripsCompanion Function({
+  Value<String> id,
+  Value<String> sourceKitId,
+  Value<String> sourceKitName,
+  Value<String> tripName,
+  Value<String?> tripNote,
+  Value<int> startedOnMs,
+  Value<int> createdAtMs,
+  Value<int> rowid,
+});
+
+final class $$TripsTableReferences
+    extends BaseReferences<_$LocalDatabase, $TripsTable, Trip> {
+  $$TripsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TripChecklistItemsTable, List<TripChecklistItem>>
+  _tripChecklistItemsRefsTable(_$LocalDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.tripChecklistItems,
+        aliasName: 'trips__id__trip_checklist_items__trip_id',
+      );
+
+  $$TripChecklistItemsTableProcessedTableManager get tripChecklistItemsRefs {
+    final manager = $$TripChecklistItemsTableTableManager(
+      $_db,
+      $_db.tripChecklistItems,
+    ).filter((f) => f.tripId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _tripChecklistItemsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$TripsTableFilterComposer
+    extends Composer<_$LocalDatabase, $TripsTable> {
+  $$TripsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceKitId => $composableBuilder(
+    column: $table.sourceKitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceKitName => $composableBuilder(
+    column: $table.sourceKitName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tripName => $composableBuilder(
+    column: $table.tripName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tripNote => $composableBuilder(
+    column: $table.tripNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startedOnMs => $composableBuilder(
+    column: $table.startedOnMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> tripChecklistItemsRefs(
+    Expression<bool> Function($$TripChecklistItemsTableFilterComposer f) f,
+  ) {
+    final $$TripChecklistItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.tripChecklistItems,
+      getReferencedColumn: (t) => t.tripId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TripChecklistItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.tripChecklistItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$TripsTableOrderingComposer
+    extends Composer<_$LocalDatabase, $TripsTable> {
+  $$TripsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceKitId => $composableBuilder(
+    column: $table.sourceKitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceKitName => $composableBuilder(
+    column: $table.sourceKitName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tripName => $composableBuilder(
+    column: $table.tripName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tripNote => $composableBuilder(
+    column: $table.tripNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startedOnMs => $composableBuilder(
+    column: $table.startedOnMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TripsTableAnnotationComposer
+    extends Composer<_$LocalDatabase, $TripsTable> {
+  $$TripsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceKitId => $composableBuilder(
+    column: $table.sourceKitId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceKitName => $composableBuilder(
+    column: $table.sourceKitName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tripName =>
+      $composableBuilder(column: $table.tripName, builder: (column) => column);
+
+  GeneratedColumn<String> get tripNote =>
+      $composableBuilder(column: $table.tripNote, builder: (column) => column);
+
+  GeneratedColumn<int> get startedOnMs => $composableBuilder(
+    column: $table.startedOnMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => column,
+  );
+
+  Expression<T> tripChecklistItemsRefs<T extends Object>(
+    Expression<T> Function($$TripChecklistItemsTableAnnotationComposer a) f,
+  ) {
+    final $$TripChecklistItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.tripChecklistItems,
+          getReferencedColumn: (t) => t.tripId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$TripChecklistItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.tripChecklistItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$TripsTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $TripsTable,
+          Trip,
+          $$TripsTableFilterComposer,
+          $$TripsTableOrderingComposer,
+          $$TripsTableAnnotationComposer,
+          $$TripsTableCreateCompanionBuilder,
+          $$TripsTableUpdateCompanionBuilder,
+          (Trip, $$TripsTableReferences),
+          Trip,
+          PrefetchHooks Function({bool tripChecklistItemsRefs})
+        > {
+  $$TripsTableTableManager(_$LocalDatabase db, $TripsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TripsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TripsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TripsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> sourceKitId = const Value.absent(),
+                Value<String> sourceKitName = const Value.absent(),
+                Value<String> tripName = const Value.absent(),
+                Value<String?> tripNote = const Value.absent(),
+                Value<int> startedOnMs = const Value.absent(),
+                Value<int> createdAtMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TripsCompanion(
+                id: id,
+                sourceKitId: sourceKitId,
+                sourceKitName: sourceKitName,
+                tripName: tripName,
+                tripNote: tripNote,
+                startedOnMs: startedOnMs,
+                createdAtMs: createdAtMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String sourceKitId,
+                required String sourceKitName,
+                required String tripName,
+                Value<String?> tripNote = const Value.absent(),
+                required int startedOnMs,
+                required int createdAtMs,
+                Value<int> rowid = const Value.absent(),
+              }) => TripsCompanion.insert(
+                id: id,
+                sourceKitId: sourceKitId,
+                sourceKitName: sourceKitName,
+                tripName: tripName,
+                tripNote: tripNote,
+                startedOnMs: startedOnMs,
+                createdAtMs: createdAtMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TripsTable, Trip>(table),
+                  $$TripsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({tripChecklistItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (tripChecklistItemsRefs) db.tripChecklistItems,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (tripChecklistItemsRefs)
+                    await $_getPrefetchedData<
+                      Trip,
+                      $TripsTable,
+                      TripChecklistItem
+                    >(
+                      currentTable: table,
+                      referencedTable: $$TripsTableReferences
+                          ._tripChecklistItemsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$TripsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).tripChecklistItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.tripId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TripsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $TripsTable,
+      Trip,
+      $$TripsTableFilterComposer,
+      $$TripsTableOrderingComposer,
+      $$TripsTableAnnotationComposer,
+      $$TripsTableCreateCompanionBuilder,
+      $$TripsTableUpdateCompanionBuilder,
+      (Trip, $$TripsTableReferences),
+      Trip,
+      PrefetchHooks Function({bool tripChecklistItemsRefs})
+    >;
+typedef $$TripChecklistItemsTableCreateCompanionBuilder =
+    TripChecklistItemsCompanion Function({
+      required String tripId,
+      required String itemId,
+      required String itemName,
+      Value<int?> quantity,
+      Value<String?> note,
+      Value<String?> categoryName,
+      required String status,
+      Value<String?> omissionNote,
+      required int sortOrder,
+      Value<int> rowid,
+    });
+typedef $$TripChecklistItemsTableUpdateCompanionBuilder =
+    TripChecklistItemsCompanion Function({
+      Value<String> tripId,
+      Value<String> itemId,
+      Value<String> itemName,
+      Value<int?> quantity,
+      Value<String?> note,
+      Value<String?> categoryName,
+      Value<String> status,
+      Value<String?> omissionNote,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+
+final class $$TripChecklistItemsTableReferences
+    extends
+        BaseReferences<
+          _$LocalDatabase,
+          $TripChecklistItemsTable,
+          TripChecklistItem
+        > {
+  $$TripChecklistItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $TripsTable _tripIdTable(_$LocalDatabase db) =>
+      db.trips.createAlias('trip_checklist_items__trip_id__trips__id');
+
+  $$TripsTableProcessedTableManager get tripId {
+    final $_column = $_itemColumn<String>('trip_id')!;
+
+    final manager = $$TripsTableTableManager(
+      $_db,
+      $_db.trips,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tripIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$TripChecklistItemsTableFilterComposer
+    extends Composer<_$LocalDatabase, $TripChecklistItemsTable> {
+  $$TripChecklistItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemName => $composableBuilder(
+    column: $table.itemName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get omissionNote => $composableBuilder(
+    column: $table.omissionNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TripsTableFilterComposer get tripId {
+    final $$TripsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tripId,
+      referencedTable: $db.trips,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TripsTableFilterComposer(
+            $db: $db,
+            $table: $db.trips,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TripChecklistItemsTableOrderingComposer
+    extends Composer<_$LocalDatabase, $TripChecklistItemsTable> {
+  $$TripChecklistItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemName => $composableBuilder(
+    column: $table.itemName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get omissionNote => $composableBuilder(
+    column: $table.omissionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TripsTableOrderingComposer get tripId {
+    final $$TripsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tripId,
+      referencedTable: $db.trips,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TripsTableOrderingComposer(
+            $db: $db,
+            $table: $db.trips,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TripChecklistItemsTableAnnotationComposer
+    extends Composer<_$LocalDatabase, $TripChecklistItemsTable> {
+  $$TripChecklistItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  GeneratedColumn<String> get itemName =>
+      $composableBuilder(column: $table.itemName, builder: (column) => column);
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get omissionNote => $composableBuilder(
+    column: $table.omissionNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  $$TripsTableAnnotationComposer get tripId {
+    final $$TripsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tripId,
+      referencedTable: $db.trips,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TripsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.trips,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TripChecklistItemsTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $TripChecklistItemsTable,
+          TripChecklistItem,
+          $$TripChecklistItemsTableFilterComposer,
+          $$TripChecklistItemsTableOrderingComposer,
+          $$TripChecklistItemsTableAnnotationComposer,
+          $$TripChecklistItemsTableCreateCompanionBuilder,
+          $$TripChecklistItemsTableUpdateCompanionBuilder,
+          (TripChecklistItem, $$TripChecklistItemsTableReferences),
+          TripChecklistItem,
+          PrefetchHooks Function({bool tripId})
+        > {
+  $$TripChecklistItemsTableTableManager(
+    _$LocalDatabase db,
+    $TripChecklistItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TripChecklistItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TripChecklistItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TripChecklistItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> tripId = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<String> itemName = const Value.absent(),
+                Value<int?> quantity = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> categoryName = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> omissionNote = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TripChecklistItemsCompanion(
+                tripId: tripId,
+                itemId: itemId,
+                itemName: itemName,
+                quantity: quantity,
+                note: note,
+                categoryName: categoryName,
+                status: status,
+                omissionNote: omissionNote,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tripId,
+                required String itemId,
+                required String itemName,
+                Value<int?> quantity = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> categoryName = const Value.absent(),
+                required String status,
+                Value<String?> omissionNote = const Value.absent(),
+                required int sortOrder,
+                Value<int> rowid = const Value.absent(),
+              }) => TripChecklistItemsCompanion.insert(
+                tripId: tripId,
+                itemId: itemId,
+                itemName: itemName,
+                quantity: quantity,
+                note: note,
+                categoryName: categoryName,
+                status: status,
+                omissionNote: omissionNote,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TripChecklistItemsTable, TripChecklistItem>(
+                    table,
+                  ),
+                  $$TripChecklistItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({tripId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (tripId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.tripId,
+                        referencedTable: $$TripChecklistItemsTableReferences
+                            ._tripIdTable(db),
+                        referencedColumn: $$TripChecklistItemsTableReferences
+                            ._tripIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TripChecklistItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $TripChecklistItemsTable,
+      TripChecklistItem,
+      $$TripChecklistItemsTableFilterComposer,
+      $$TripChecklistItemsTableOrderingComposer,
+      $$TripChecklistItemsTableAnnotationComposer,
+      $$TripChecklistItemsTableCreateCompanionBuilder,
+      $$TripChecklistItemsTableUpdateCompanionBuilder,
+      (TripChecklistItem, $$TripChecklistItemsTableReferences),
+      TripChecklistItem,
+      PrefetchHooks Function({bool tripId})
+    >;
 
 class $LocalDatabaseManager {
   final _$LocalDatabase _db;
@@ -2330,4 +4160,8 @@ class $LocalDatabaseManager {
       $$KitCategoriesTableTableManager(_db, _db.kitCategories);
   $$KitItemsTableTableManager get kitItems =>
       $$KitItemsTableTableManager(_db, _db.kitItems);
+  $$TripsTableTableManager get trips =>
+      $$TripsTableTableManager(_db, _db.trips);
+  $$TripChecklistItemsTableTableManager get tripChecklistItems =>
+      $$TripChecklistItemsTableTableManager(_db, _db.tripChecklistItems);
 }

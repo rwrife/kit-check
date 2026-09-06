@@ -14,6 +14,19 @@ abstract interface class KitCheckRepository {
   Future<KitTemplate> duplicateKit(KitId id, {String? name});
 
   Future<void> deleteKit(KitId id);
+
+  Future<TripChecklistSnapshot> createTrip({
+    required KitId kitId,
+    required String tripName,
+    String? tripNote,
+    DateTime? startedOn,
+  });
+
+  Future<void> saveTrip(TripChecklistSnapshot trip);
+
+  Future<TripChecklistSnapshot?> loadTrip(TripId id);
+
+  Future<List<TripChecklistSnapshot>> loadTrips();
 }
 
 class InMemoryKitCheckRepository implements KitCheckRepository {
@@ -21,6 +34,8 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
     : _idFactory = idFactory ?? _defaultIdFactory;
 
   final Map<KitId, KitTemplate> _kitsById = <KitId, KitTemplate>{};
+  final Map<TripId, TripChecklistSnapshot> _tripsById =
+      <TripId, TripChecklistSnapshot>{};
   final String Function(String prefix) _idFactory;
 
   static int _idCounter = 0;
@@ -35,6 +50,29 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
     final kit = KitTemplate(id: KitId(_idFactory('kit')), name: name);
     await saveKit(kit);
     return kit;
+  }
+
+  @override
+  Future<TripChecklistSnapshot> createTrip({
+    required KitId kitId,
+    required String tripName,
+    String? tripNote,
+    DateTime? startedOn,
+  }) async {
+    final kit = _kitsById[kitId];
+    if (kit == null) {
+      throw StateError('Kit not found: ${kitId.value}');
+    }
+
+    final trip = TripChecklistSnapshot.fromKitTemplate(
+      id: TripId(_idFactory('trip')),
+      kit: kit,
+      tripName: tripName,
+      tripNote: tripNote,
+      startedOn: startedOn ?? DateTime.now(),
+    );
+    await saveTrip(trip);
+    return trip;
   }
 
   @override
@@ -103,6 +141,18 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
   }
 
   @override
+  Future<TripChecklistSnapshot?> loadTrip(TripId id) async {
+    return _tripsById[id];
+  }
+
+  @override
+  Future<List<TripChecklistSnapshot>> loadTrips() async {
+    final trips = _tripsById.values.toList(growable: false)
+      ..sort(_tripComparator);
+    return trips;
+  }
+
+  @override
   Future<void> renameKit(KitId id, String name) async {
     final existing = _kitsById[id];
     if (existing == null) {
@@ -123,6 +173,12 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
   @override
   Future<void> saveKit(KitTemplate kit) async {
     _kitsById[kit.id] = _canonicalizeKit(kit);
+  }
+
+  @override
+  Future<void> saveTrip(TripChecklistSnapshot trip) async {
+    _validateTrip(trip);
+    _tripsById[trip.id] = trip;
   }
 
   @override
@@ -149,6 +205,45 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
       return byName;
     }
     return left.id.value.compareTo(right.id.value);
+  }
+
+  static int _tripComparator(
+    TripChecklistSnapshot left,
+    TripChecklistSnapshot right,
+  ) {
+    final byDate = right.startedOn.compareTo(left.startedOn);
+    if (byDate != 0) {
+      return byDate;
+    }
+    return left.id.value.compareTo(right.id.value);
+  }
+
+  static void _validateTrip(TripChecklistSnapshot trip) {
+    for (final item in trip.items) {
+      switch (item.status) {
+        case ChecklistStatus.pending:
+        case ChecklistStatus.packed:
+        case ChecklistStatus.returned:
+          if (item.omissionNote != null) {
+            throw ArgumentError.value(
+              item.omissionNote,
+              'omissionNote',
+              'Only omitted items can include an omission note',
+            );
+          }
+          break;
+        case ChecklistStatus.omitted:
+          final note = item.omissionNote?.trim();
+          if (note == null || note.isEmpty) {
+            throw ArgumentError.value(
+              item.omissionNote,
+              'omissionNote',
+              'Omitted items require an omission note',
+            );
+          }
+          break;
+      }
+    }
   }
 
   static int _categoryComparator(KitCategory left, KitCategory right) {

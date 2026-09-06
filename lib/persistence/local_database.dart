@@ -56,6 +56,49 @@ class KitItems extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+class Trips extends Table {
+  TextColumn get id => text()();
+
+  TextColumn get sourceKitId => text()();
+
+  TextColumn get sourceKitName => text()();
+
+  TextColumn get tripName => text()();
+
+  TextColumn get tripNote => text().nullable()();
+
+  IntColumn get startedOnMs => integer()();
+
+  IntColumn get createdAtMs => integer()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+class TripChecklistItems extends Table {
+  TextColumn get tripId =>
+      text().references(Trips, #id, onDelete: KeyAction.cascade)();
+
+  TextColumn get itemId => text()();
+
+  TextColumn get itemName => text()();
+
+  IntColumn get quantity => integer().nullable()();
+
+  TextColumn get note => text().nullable()();
+
+  TextColumn get categoryName => text().nullable()();
+
+  TextColumn get status => text()();
+
+  TextColumn get omissionNote => text().nullable()();
+
+  IntColumn get sortOrder => integer()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {tripId, itemId};
+}
+
 LazyDatabase openLocalDatabaseFile(String path) {
   return LazyDatabase(() async {
     final file = File(path);
@@ -64,7 +107,9 @@ LazyDatabase openLocalDatabaseFile(String path) {
   });
 }
 
-@DriftDatabase(tables: <Type>[Kits, KitCategories, KitItems])
+@DriftDatabase(
+  tables: <Type>[Kits, KitCategories, KitItems, Trips, TripChecklistItems],
+)
 class LocalDatabase extends _$LocalDatabase {
   LocalDatabase(super.e);
 
@@ -77,7 +122,7 @@ class LocalDatabase extends _$LocalDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -87,6 +132,10 @@ class LocalDatabase extends _$LocalDatabase {
     onUpgrade: (Migrator m, int from, int to) async {
       if (from < 2) {
         await m.addColumn(kits, kits.isArchived);
+      }
+      if (from < 3) {
+        await m.createTable(trips);
+        await m.createTable(tripChecklistItems);
       }
     },
     beforeOpen: (OpeningDetails details) async {

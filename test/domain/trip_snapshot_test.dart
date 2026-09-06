@@ -107,4 +107,23 @@ void main() {
     expect(original.unresolvedItems.length, 3);
     expect(updated.unresolvedItems.length, 3);
   });
+
+  test('completed trip has no unresolved items', () {
+    final original = TripChecklistSnapshot.fromKitTemplate(
+      id: TripId('trip-4'),
+      kit: makeKit(),
+      tripName: 'All packed and returned',
+      startedOn: DateTime.utc(2026, 9, 4),
+    );
+
+    final completed = original.items.fold<TripChecklistSnapshot>(
+      original,
+      (snapshot, item) => snapshot.updateItem(
+        item.itemId,
+        (current) => current.markPacked().markReturned(),
+      ),
+    );
+
+    expect(completed.unresolvedItems, isEmpty);
+  });
 }
