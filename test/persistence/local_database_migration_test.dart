@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 void main() {
-  test('migrates schema v1 kits table to include archive flag', () async {
+  test('migrates schema v1 kits table to latest trip-enabled schema', () async {
     final tempDir = await Directory.systemTemp.createTemp(
       'kit-check-migration-',
     );
@@ -48,14 +48,23 @@ void main() {
 
     final database = LocalDatabase.file(databasePath);
 
-    final tableInfo = await database
+    final kitsTableInfo = await database
         .customSelect('PRAGMA table_info(kits);')
         .get();
-    final hasArchiveColumn = tableInfo.any(
+    final hasArchiveColumn = kitsTableInfo.any(
       (row) => row.data['name'] == 'is_archived',
     );
 
+    final tripsTableInfo = await database
+        .customSelect('PRAGMA table_info(trips);')
+        .get();
+    final tripChecklistTableInfo = await database
+        .customSelect('PRAGMA table_info(trip_checklist_items);')
+        .get();
+
     expect(hasArchiveColumn, isTrue);
+    expect(tripsTableInfo, isNotEmpty);
+    expect(tripChecklistTableInfo, isNotEmpty);
 
     final kits = await database.select(database.kits).get();
     expect(kits, hasLength(1));

@@ -186,5 +186,153 @@ void main() {
         expect(persisted.items[2].quantity, 1);
       },
     );
+
+    test(
+      'trip snapshots remain independent from later template edits',
+      () async {
+        final kit = model.KitTemplate(
+          id: model.KitId('kit-weekend'),
+          name: 'Weekend Kit',
+          categories: <model.KitCategory>[
+            model.KitCategory(
+              id: model.CategoryId('cat-clothes'),
+              name: 'Clothes',
+              sortOrder: 1,
+            ),
+            model.KitCategory(
+              id: model.CategoryId('cat-toiletries'),
+              name: 'Toiletries',
+              sortOrder: 0,
+            ),
+          ],
+          items: <model.KitItemTemplate>[
+            model.KitItemTemplate(
+              id: model.ItemId('item-shirt'),
+              name: 'Shirt',
+              quantity: 2,
+              categoryId: model.CategoryId('cat-clothes'),
+              sortOrder: 0,
+            ),
+            model.KitItemTemplate(
+              id: model.ItemId('item-toothbrush'),
+              name: 'Toothbrush',
+              categoryId: model.CategoryId('cat-toiletries'),
+              sortOrder: 0,
+            ),
+          ],
+        );
+        await repository.saveKit(kit);
+
+        final trip = await repository.createTrip(
+          kitId: kit.id,
+          tripName: 'Seattle weekend',
+          tripNote: 'Rain expected',
+          startedOn: DateTime.utc(2026, 9, 5),
+        );
+
+        await repository.saveKit(
+          model.KitTemplate(
+            id: kit.id,
+            name: 'Weekend Kit Updated',
+            categories: kit.categories,
+            items: <model.KitItemTemplate>[
+              model.KitItemTemplate(
+                id: model.ItemId('item-shirt'),
+                name: 'Rain Jacket',
+                quantity: 1,
+                categoryId: model.CategoryId('cat-clothes'),
+                sortOrder: 0,
+              ),
+            ],
+          ),
+        );
+
+        await repository.close();
+        await openRepository();
+
+        final reloaded = await repository.loadTrip(trip.id);
+        expect(reloaded, isNotNull);
+        expect(reloaded!.tripName, 'Seattle weekend');
+        expect(reloaded.tripNote, 'Rain expected');
+        expect(reloaded.startedOn, DateTime.utc(2026, 9, 5));
+        expect(
+          reloaded.items.map((item) => item.itemName).toList(growable: false),
+          <String>['Toothbrush', 'Shirt'],
+        );
+        expect(
+          reloaded.items.map((item) => item.status).toList(growable: false),
+          <model.ChecklistStatus>[
+            model.ChecklistStatus.pending,
+            model.ChecklistStatus.pending,
+          ],
+        );
+      },
+    );
+
+    test('persists checklist transitions and unresolved trip items', () async {
+      final kit = model.KitTemplate(
+        id: model.KitId('kit-core'),
+        name: 'Core Kit',
+        items: <model.KitItemTemplate>[
+          model.KitItemTemplate(
+            id: model.ItemId('item-passport'),
+            name: 'Passport',
+            sortOrder: 0,
+          ),
+          model.KitItemTemplate(
+            id: model.ItemId('item-socks'),
+            name: 'Socks',
+            sortOrder: 1,
+          ),
+        ],
+      );
+      await repository.saveKit(kit);
+
+      final trip = await repository.createTrip(
+        kitId: kit.id,
+        tripName: 'Road trip',
+        startedOn: DateTime.utc(2026, 9, 6),
+      );
+
+      final progressed = trip
+          .updateItem(
+            model.ItemId('item-passport'),
+            (item) => item.markPacked().markReturned(),
+          )
+          .updateItem(
+            model.ItemId('item-socks'),
+            (item) => item.omit('Laundry not finished'),
+          );
+
+      await repository.saveTrip(progressed);
+
+      await repository.close();
+      await openRepository();
+
+      final reloaded = await repository.loadTrip(trip.id);
+      expect(reloaded, isNotNull);
+
+      final statusByItem = <String, model.ChecklistStatus>{
+        for (final item in reloaded!.items) item.itemId.value: item.status,
+      };
+      expect(statusByItem['item-passport'], model.ChecklistStatus.returned);
+      expect(statusByItem['item-socks'], model.ChecklistStatus.omitted);
+      expect(
+        reloaded.unresolvedItems.map((item) => item.itemId.value),
+        <String>['item-socks'],
+      );
+
+      final invalidOmission = reloaded.updateItem(
+        model.ItemId('item-socks'),
+        (item) => item.copyWith(
+          status: model.ChecklistStatus.omitted,
+          omissionNote: null,
+        ),
+      );
+      await expectLater(
+        () => repository.saveTrip(invalidOmission),
+        throwsArgumentError,
+      );
+    });
   });
 }
