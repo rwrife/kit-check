@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:kit_check/app/app_configuration.dart';
+import 'package:kit_check/persistence/kit_check_repository.dart';
 import 'package:kit_check/presentation/home_screen.dart';
 
 class KitCheckApp extends StatelessWidget {
-  const KitCheckApp({super.key, required this.configuration});
+  KitCheckApp({
+    super.key,
+    required this.configuration,
+    KitCheckRepository? repository,
+  }) : repository = repository ?? InMemoryKitCheckRepository();
 
   final AppConfiguration configuration;
+  final KitCheckRepository repository;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +21,7 @@ class KitCheckApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: HomeScreen(configuration: configuration),
+      home: HomeScreen(configuration: configuration, repository: repository),
     );
   }
 }
