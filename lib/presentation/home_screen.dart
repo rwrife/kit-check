@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kit_check/app/app_configuration.dart';
+import 'package:kit_check/backup/backup_document.dart';
+import 'package:kit_check/backup/backup_service.dart';
 import 'package:kit_check/domain/models.dart';
 import 'package:kit_check/persistence/kit_check_repository.dart';
 
@@ -23,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _tripNameController = TextEditingController();
 
   final List<String> _draftItems = <String>[];
+
+  late final BackupService _backupService = BackupService(widget.repository);
 
   KitTemplate? _kit;
   TripChecklistSnapshot? _trip;
@@ -251,6 +256,221 @@ class _HomeScreenState extends State<HomeScreen> {
     return result.trim();
   }
 
+  Future<void> _exportBackupJson() async {
+    await _runBusy(() async {
+      final json = await _backupService.exportBackupJson();
+      await Clipboard.setData(ClipboardData(text: json));
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _errorMessage = null;
+      });
+      _showNotice('Backup copied to clipboard as versioned JSON.');
+    });
+  }
+
+  Future<void> _exportHistoryCsv() async {
+    await _runBusy(() async {
+      final csv = await _backupService.exportHistoryCsv();
+      await Clipboard.setData(ClipboardData(text: csv));
+      if (!mounted) {
+        return;
+      }
+      _showNotice('Trip history copied to clipboard as CSV.');
+    });
+  }
+
+  Future<void> _restoreFromBackup() async {
+    final raw = await _promptForBackupJson();
+    if (raw == null || raw.trim().isEmpty) {
+      return;
+    }
+
+    BackupDocument document;
+    try {
+      document = BackupCodec.decode(raw);
+    } on BackupValidationException catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _errorMessage = 'Backup rejected, no data changed: ${error.message}';
+      });
+      return;
+    }
+
+    final plan = await _backupService.previewRestore(document);
+    if (!mounted) {
+      return;
+    }
+
+    final confirmed = await _confirmRestore(plan);
+    if (confirmed != true) {
+      return;
+    }
+
+    await _runBusy(() async {
+      final summary = await _backupService.applyRestore(
+        document,
+        userConfirmed: true,
+        mode: RestoreMode.replaceAll,
+        conflictResolution: RestoreConflictResolution.overwrite,
+      );
+      await _bootstrapFromRepository();
+      if (!mounted) {
+        return;
+      }
+      _showNotice(
+        'Restore applied: ${summary.kitsInserted + summary.kitsOverwritten} '
+        'kit(s), ${summary.tripsInserted + summary.tripsOverwritten} trip(s).',
+      );
+    });
+  }
+
+  Future<void> _deleteAllData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete all local data?'),
+          content: const Text(
+            'This permanently removes every kit, trip, and checklist from '
+            'this device. There is no undo. Export a backup first if you '
+            'want to keep a copy.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              key: const ValueKey('confirm-delete-all-button'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete everything'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await _runBusy(() async {
+      await _backupService.deleteAllData();
+      await _bootstrapFromRepository();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _kit = null;
+        _trip = null;
+        _kitNameController.clear();
+        _tripNameController.clear();
+        _draftItems.clear();
+      });
+      _showNotice('All local data deleted.');
+    });
+  }
+
+  Future<String?> _promptForBackupJson() async {
+    var backupText = '';
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Restore from backup JSON'),
+          content: SizedBox(
+            width: 480,
+            child: TextField(
+              key: const ValueKey('backup-json-field'),
+              autofocus: true,
+              maxLines: 10,
+              decoration: const InputDecoration(
+                labelText: 'Paste backup JSON',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                backupText = value;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              key: const ValueKey('preview-restore-button'),
+              onPressed: () => Navigator.of(context).pop(backupText),
+              child: const Text('Preview restore'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool?> _confirmRestore(RestorePlan plan) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm restore'),
+          content: Semantics(
+            label: 'Restore preview',
+            child: Column(
+              key: const ValueKey('restore-preview'),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Backup contains ${plan.totalIncoming} record(s).'),
+                Text('New kits: ${plan.newKitIds.length}'),
+                Text(
+                  'Existing kits to overwrite: '
+                  '${plan.conflictingKitIds.length}',
+                ),
+                Text('New trips: ${plan.newTripIds.length}'),
+                Text(
+                  'Existing trips to overwrite: '
+                  '${plan.conflictingTripIds.length}',
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'This replaces all current local data on this device '
+                  'with the backup. There is no undo.',
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              key: const ValueKey('confirm-restore-button'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Replace data and restore'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNotice(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        key: const ValueKey('data-notice-snack'),
+        content: Text(message),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final trip = _trip;
@@ -313,8 +533,70 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _buildTripChecklist(context, trip),
           ],
+          const SizedBox(height: 24),
+          _buildDataSection(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildDataSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Data & backup (local only)',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Everything stays on this device. Exports copy data to the '
+          'clipboard so you can save it yourself; nothing is uploaded.',
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            Semantics(
+              label: 'Export JSON backup to clipboard',
+              button: true,
+              child: FilledButton.tonal(
+                key: const ValueKey('export-backup-button'),
+                onPressed: _isBusy ? null : _exportBackupJson,
+                child: const Text('Export JSON backup'),
+              ),
+            ),
+            Semantics(
+              label: 'Export trip history CSV to clipboard',
+              button: true,
+              child: FilledButton.tonal(
+                key: const ValueKey('export-csv-button'),
+                onPressed: _isBusy ? null : _exportHistoryCsv,
+                child: const Text('Export history CSV'),
+              ),
+            ),
+            Semantics(
+              label: 'Restore local data from backup JSON',
+              button: true,
+              child: OutlinedButton(
+                key: const ValueKey('restore-backup-button'),
+                onPressed: _isBusy ? null : _restoreFromBackup,
+                child: const Text('Restore from backup'),
+              ),
+            ),
+            Semantics(
+              label: 'Delete all local data',
+              button: true,
+              child: OutlinedButton(
+                key: const ValueKey('delete-all-button'),
+                onPressed: _isBusy ? null : _deleteAllData,
+                child: const Text('Delete all local data'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

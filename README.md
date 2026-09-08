@@ -71,3 +71,8 @@ GitHub Actions runs:
 - `dart format --output=none --set-exit-if-changed lib test`
 - `flutter analyze`
 - `flutter test`
+
+## Data portability
+
+Backup/restore JSON schema, CSV history export columns, and delete-all
+behavior are documented in [docs/backup-and-export.md](docs/backup-and-export.md).
