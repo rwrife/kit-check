@@ -27,6 +27,12 @@ abstract interface class KitCheckRepository {
   Future<TripChecklistSnapshot?> loadTrip(TripId id);
 
   Future<List<TripChecklistSnapshot>> loadTrips();
+
+  /// Delete all locally stored user data (kits, categories, items, trips,
+  /// and checklist snapshots). This is the single entry point used by the
+  /// user-facing "delete all local data" confirmation flow and by
+  /// replace-all restores. There is no undo.
+  Future<void> clearAllData();
 }
 
 class InMemoryKitCheckRepository implements KitCheckRepository {
@@ -73,6 +79,12 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
     );
     await saveTrip(trip);
     return trip;
+  }
+
+  @override
+  Future<void> clearAllData() async {
+    _kitsById.clear();
+    _tripsById.clear();
   }
 
   @override

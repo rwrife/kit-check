@@ -27,6 +27,17 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
   Future<void> close() => _database.close();
 
   @override
+  Future<void> clearAllData() async {
+    await _database.transaction(() async {
+      await _database.delete(_database.tripChecklistItems).go();
+      await _database.delete(_database.trips).go();
+      await _database.delete(_database.kitItems).go();
+      await _database.delete(_database.kitCategories).go();
+      await _database.delete(_database.kits).go();
+    });
+  }
+
+  @override
   Future<model.KitTemplate> createKit(String name) async {
     final kit = model.KitTemplate(
       id: model.KitId(_idFactory('kit')),
