@@ -110,6 +110,32 @@ One row per checklist item (trips with no items emit one row with empty item
 columns). The CSV contains only your own kit/trip data — no device
 identifiers, no analytics fields, nothing else.
 
+## Trip history search and filters
+
+The Trip history section lists every trip stored on this device, newest
+start date first (ties broken by trip id so ordering is deterministic).
+Search and filters run entirely in memory against local data:
+
+- Free-text search over trip name, trip note, kit name, item names, and
+  omission notes. Matching is case-insensitive and every whitespace-
+  separated term must appear somewhere in the trip.
+- Kit dropdown filter, inclusive `started from`/`through` date range, and
+  active/completed/unresolved filters. A trip is *active* while any
+  checklist item is still unresolved and *completed* once every item has
+  been returned.
+
+None of this queries a server. There is no index or cache beyond the local
+database, so turning on airplane mode changes nothing about search results.
+
+## Deleting a single trip
+
+Each history card has a **Delete trip** action. It permanently removes that
+trip and its checklist snapshot from the on-device database; the trip
+disappears from history views and from any JSON backup or CSV export taken
+afterwards. There is no undo and no automatic export — the confirmation
+dialog states this before anything is deleted. Deleting one trip never
+touches kits or other trips.
+
 ## Delete all local data
 
 "Delete all local data" removes every kit, category, item, trip, and

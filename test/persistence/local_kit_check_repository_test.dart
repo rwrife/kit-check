@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kit_check/domain/models.dart' as model;
 import 'package:kit_check/persistence/local_database.dart';
@@ -334,5 +335,58 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'deleteTrip removes the trip and its checklist items from storage',
+      () async {
+        final kit = model.KitTemplate(
+          id: model.KitId('kit-del'),
+          name: 'Delete Kit',
+          items: <model.KitItemTemplate>[
+            model.KitItemTemplate(
+              id: model.ItemId('item-hat'),
+              name: 'Hat',
+              sortOrder: 0,
+            ),
+          ],
+        );
+        await repository.saveKit(kit);
+
+        final doomed = await repository.createTrip(
+          kitId: kit.id,
+          tripName: 'Doomed Trip',
+          startedOn: DateTime.utc(2026, 4, 1),
+        );
+        final survivor = await repository.createTrip(
+          kitId: kit.id,
+          tripName: 'Survivor Trip',
+          startedOn: DateTime.utc(2026, 4, 2),
+        );
+
+        await repository.deleteTrip(doomed.id);
+
+        await repository.close();
+        await openRepository();
+
+        expect(await repository.loadTrip(doomed.id), isNull);
+        final remaining = await repository.loadTrips();
+        expect(remaining.map((trip) => trip.id.value), <String>[
+          survivor.id.value,
+        ]);
+
+        final remainingChecklist = await database
+            .customSelect(
+              'SELECT COUNT(*) AS count FROM trip_checklist_items '
+              'WHERE trip_id = ?',
+              variables: <Variable<Object>>[Variable<String>(doomed.id.value)],
+            )
+            .getSingle();
+        expect(remainingChecklist.read<int>('count'), 0);
+
+        // Deleting a missing trip is a no-op.
+        await repository.deleteTrip(model.TripId('trip-missing'));
+        expect(await repository.loadTrips(), hasLength(1));
+      },
+    );
   });
 }

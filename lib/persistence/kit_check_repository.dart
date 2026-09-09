@@ -28,6 +28,11 @@ abstract interface class KitCheckRepository {
 
   Future<List<TripChecklistSnapshot>> loadTrips();
 
+  /// Delete a single trip and its checklist items from local storage.
+  /// The trip disappears from history views and future exports immediately.
+  /// There is no undo. Deleting a missing trip is a no-op.
+  Future<void> deleteTrip(TripId id);
+
   /// Delete all locally stored user data (kits, categories, items, trips,
   /// and checklist snapshots). This is the single entry point used by the
   /// user-facing "delete all local data" confirmation flow and by
@@ -85,6 +90,11 @@ class InMemoryKitCheckRepository implements KitCheckRepository {
   Future<void> clearAllData() async {
     _kitsById.clear();
     _tripsById.clear();
+  }
+
+  @override
+  Future<void> deleteTrip(TripId id) async {
+    _tripsById.remove(id);
   }
 
   @override
