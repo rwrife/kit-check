@@ -4,6 +4,7 @@ import 'package:kit_check/app/app_configuration.dart';
 import 'package:kit_check/backup/backup_document.dart';
 import 'package:kit_check/backup/backup_service.dart';
 import 'package:kit_check/domain/models.dart';
+import 'package:kit_check/history/trip_history_query.dart';
 import 'package:kit_check/persistence/kit_check_repository.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _kitNameController = TextEditingController();
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _tripNameController = TextEditingController();
+  final TextEditingController _historySearchController =
+      TextEditingController();
+  final TextEditingController _historyFromController = TextEditingController();
+  final TextEditingController _historyToController = TextEditingController();
 
   final List<String> _draftItems = <String>[];
 
@@ -33,6 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
   TripChecklistSnapshot? _trip;
   bool _isBusy = false;
   String? _errorMessage;
+
+  List<KitTemplate> _allKits = const <KitTemplate>[];
+  List<TripChecklistSnapshot> _allTrips = const <TripChecklistSnapshot>[];
+  KitId? _historyKitFilter;
+  TripStateFilter _historyState = TripStateFilter.all;
+  bool _historyUnresolvedOnly = false;
 
   @override
   void initState() {
@@ -45,22 +56,36 @@ class _HomeScreenState extends State<HomeScreen> {
     _kitNameController.dispose();
     _itemNameController.dispose();
     _tripNameController.dispose();
+    _historySearchController.dispose();
+    _historyFromController.dispose();
+    _historyToController.dispose();
     super.dispose();
   }
 
   Future<void> _bootstrapFromRepository() async {
     try {
-      final kits = await widget.repository.loadKits(includeArchived: false);
+      final activeKits = await widget.repository.loadKits(
+        includeArchived: false,
+      );
+      final allKits = await widget.repository.loadKits(includeArchived: true);
       final trips = await widget.repository.loadTrips();
 
       if (!mounted) {
         return;
       }
 
+      final visibleKitIds = activeKits.map((kit) => kit.id).toSet();
+
       setState(() {
-        if (kits.isNotEmpty) {
-          _kit = kits.first;
-          _kitNameController.text = kits.first.name;
+        _allKits = allKits;
+        _allTrips = trips;
+        if (_historyKitFilter != null &&
+            !visibleKitIds.contains(_historyKitFilter)) {
+          _historyKitFilter = null;
+        }
+        if (activeKits.isNotEmpty) {
+          _kit = activeKits.first;
+          _kitNameController.text = activeKits.first.name;
         }
         if (trips.isNotEmpty) {
           _trip = trips.first;
@@ -155,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _trip = null;
         _tripNameController.clear();
         _draftItems.clear();
+        _allKits = <KitTemplate>[..._allKits, populated];
       });
     });
   }
@@ -177,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       setState(() {
         _trip = created;
+        _allTrips = <TripChecklistSnapshot>[created, ..._allTrips];
       });
     });
   }
@@ -199,6 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       setState(() {
         _trip = updated;
+        _allTrips = _allTrips
+            .map((existing) => existing.id == updated.id ? updated : existing)
+            .toList(growable: false);
       });
     });
   }
@@ -375,6 +405,78 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  TripHistoryQuery _buildHistoryQuery() {
+    return TripHistoryQuery(
+      searchText: _historySearchController.text,
+      kitId: _historyKitFilter,
+      startedFrom: _parseHistoryDate(_historyFromController.text),
+      startedThrough: _endOfDay(_parseHistoryDate(_historyToController.text)),
+      state: _historyState,
+      unresolvedOnly: _historyUnresolvedOnly,
+    );
+  }
+
+  static DateTime? _parseHistoryDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    return DateTime.tryParse(trimmed)?.toUtc();
+  }
+
+  static DateTime? _endOfDay(DateTime? date) {
+    if (date == null) {
+      return null;
+    }
+    return DateTime.utc(date.year, date.month, date.day, 23, 59, 59, 999);
+  }
+
+  Future<void> _deleteTrip(TripChecklistSnapshot trip) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Delete trip "${trip.tripName}"?'),
+          content: const Text(
+            'This permanently removes the trip and its checklist from '
+            'local history and from future exports on this device. '
+            'There is no undo.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              key: const ValueKey('confirm-delete-trip-button'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete trip'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await _runBusy(() async {
+      await widget.repository.deleteTrip(trip.id);
+      await _bootstrapFromRepository();
+      if (!mounted) {
+        return;
+      }
+      if (_trip?.id == trip.id) {
+        setState(() {
+          _trip = null;
+          _tripNameController.clear();
+        });
+      }
+      _showNotice('Trip deleted from local history.');
+    });
+  }
+
   Future<String?> _promptForBackupJson() async {
     var backupText = '';
 
@@ -535,9 +637,266 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           const SizedBox(height: 24),
           _buildDataSection(context),
+          const SizedBox(height: 24),
+          _buildHistorySection(context),
         ],
       ),
     );
+  }
+
+  Widget _buildHistorySection(BuildContext context) {
+    final query = _buildHistoryQuery();
+    final matches = filterTrips(_allTrips, query);
+    final invalidDateRange =
+        query.startedFrom != null &&
+        query.startedThrough != null &&
+        query.startedFrom!.isAfter(query.startedThrough!);
+
+    return Semantics(
+      label: 'Local trip history',
+      child: Column(
+        key: const ValueKey('trip-history-section'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Trip history (local only)',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Search and filters run entirely on this device. Deleting a '
+            'trip removes it from local history and future exports with no '
+            'undo.',
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const ValueKey('history-search-field'),
+            controller: _historySearchController,
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Search trips',
+              hintText: 'Trip, kit, item, or omission note',
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('history-from-field'),
+                  controller: _historyFromController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Started from (YYYY-MM-DD)',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('history-to-field'),
+                  controller: _historyToController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Started through (YYYY-MM-DD)',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (invalidDateRange) ...<Widget>[
+            const SizedBox(height: 8),
+            Semantics(
+              label: 'Invalid history date range',
+              child: Text(
+                'The start date is after the end date, so no trips match.',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Semantics(
+            label: 'Filter history by kit',
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String?>(
+                key: const ValueKey('history-kit-filter'),
+                isExpanded: true,
+                value: _historyKitFilter?.value,
+                hint: const Text('All kits'),
+                items: <DropdownMenuItem<String?>>[
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All kits'),
+                  ),
+                  for (final kit in _allKits)
+                    DropdownMenuItem<String?>(
+                      value: kit.id.value,
+                      child: Text(kit.name),
+                    ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _historyKitFilter = value == null ? null : KitId(value);
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              for (final option in TripStateFilter.values)
+                Semantics(
+                  label: 'History state filter ${option.name}',
+                  button: true,
+                  child: FilterChip(
+                    key: ValueKey<String>('history-state-${option.name}'),
+                    label: Text(_tripStateLabel(option)),
+                    selected: _historyState == option,
+                    onSelected: (_) {
+                      setState(() {
+                        _historyState = option;
+                      });
+                    },
+                  ),
+                ),
+              Semantics(
+                label: 'Show only trips with unresolved items',
+                button: true,
+                child: FilterChip(
+                  key: const ValueKey('history-unresolved-chip'),
+                  label: const Text('Unresolved items only'),
+                  selected: _historyUnresolvedOnly,
+                  onSelected: (selected) {
+                    setState(() {
+                      _historyUnresolvedOnly = selected;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            label: 'History search controls',
+            child: Row(
+              children: <Widget>[
+                Semantics(
+                  label: 'Clear history filters',
+                  button: true,
+                  child: OutlinedButton(
+                    key: const ValueKey('history-clear-filters'),
+                    onPressed:
+                        !_allTrips.any((trip) => query.matches(trip)) &&
+                            !query.isActive
+                        ? null
+                        : () {
+                            setState(() {
+                              _historySearchController.clear();
+                              _historyFromController.clear();
+                              _historyToController.clear();
+                              _historyKitFilter = null;
+                              _historyState = TripStateFilter.all;
+                              _historyUnresolvedOnly = false;
+                            });
+                          },
+                    child: const Text('Clear filters'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  query.isActive
+                      ? '${matches.length} of ${_allTrips.length} trip(s) match'
+                      : '${_allTrips.length} trip(s) in history',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_allTrips.isEmpty)
+            const Text('No trips yet. Start a trip checklist above.')
+          else if (matches.isEmpty)
+            const Text('No trips match the current filters.')
+          else
+            for (final trip in matches) _buildHistoryTripCard(trip),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryTripCard(TripChecklistSnapshot trip) {
+    final unresolved = trip.unresolvedItems.length;
+
+    return Card(
+      key: ValueKey<String>('history-trip-${trip.id.value}'),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(trip.tripName, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              'Kit: ${trip.kitName} · Started: '
+              '${trip.startedOn.toUtc().toIso8601String().substring(0, 10)}',
+            ),
+            Semantics(
+              label: 'Unresolved item count for ${trip.tripName}: $unresolved',
+              child: Text(
+                unresolved == 0
+                    ? 'Completed — all items returned'
+                    : '$unresolved unresolved item(s)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                Semantics(
+                  label: 'Open trip ${trip.tripName}',
+                  button: true,
+                  child: FilledButton.tonal(
+                    key: ValueKey<String>('open-trip-${trip.id.value}'),
+                    onPressed: _isBusy
+                        ? null
+                        : () {
+                            setState(() {
+                              _trip = trip;
+                              _tripNameController.text = trip.tripName;
+                            });
+                          },
+                    child: const Text('Open'),
+                  ),
+                ),
+                Semantics(
+                  label: 'Delete trip ${trip.tripName} from local history',
+                  button: true,
+                  child: OutlinedButton(
+                    key: ValueKey<String>('delete-trip-${trip.id.value}'),
+                    onPressed: _isBusy ? null : () => _deleteTrip(trip),
+                    child: const Text('Delete trip'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _tripStateLabel(TripStateFilter filter) {
+    return switch (filter) {
+      TripStateFilter.all => 'All trips',
+      TripStateFilter.active => 'Active',
+      TripStateFilter.completed => 'Completed',
+    };
   }
 
   Widget _buildDataSection(BuildContext context) {

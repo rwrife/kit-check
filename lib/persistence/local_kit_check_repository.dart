@@ -79,6 +79,18 @@ class LocalDriftKitCheckRepository implements KitCheckRepository {
   }
 
   @override
+  Future<void> deleteTrip(model.TripId id) async {
+    await _database.transaction(() async {
+      await (_database.delete(
+        _database.tripChecklistItems,
+      )..where((tbl) => tbl.tripId.equals(id.value))).go();
+      await (_database.delete(
+        _database.trips,
+      )..where((tbl) => tbl.id.equals(id.value))).go();
+    });
+  }
+
+  @override
   Future<model.KitTemplate> duplicateKit(model.KitId id, {String? name}) async {
     final source = await _loadKitById(id);
     if (source == null) {
