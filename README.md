@@ -49,11 +49,13 @@ The app will support screen-reader labels, keyboard/switch navigation where the 
 
 ## Status and milestones
 
-The repository now contains the Flutter foundation for Android and iOS, a local-only startup configuration, and baseline domain + widget tests. Remaining milestones:
-
-1. Implement Drift-backed local persistence and kit CRUD.
-2. Add trip snapshot workflows and return-state transitions in UI.
-3. Add export/backup/restore and release-readiness validation.
+Core MVP functionality is implemented on `main`: Drift-backed local
+persistence and kit CRUD, trip snapshot workflows with packing/return
+states, searchable history with filters and per-trip deletion,
+versioned backup/restore, CSV export, and delete-all controls. Remaining
+work: switching the running app from the in-memory repository to the
+file-backed Drift database (persistence across restarts) and completing
+the manual device validation checklist before any release claim.
 
 ## Development quickstart
 
@@ -66,11 +68,26 @@ flutter run
 
 ## CI quality gate
 
-GitHub Actions runs:
+GitHub Actions runs on every pull request and push to `main`:
 
 - `dart format --output=none --set-exit-if-changed lib test`
 - `flutter analyze`
-- `flutter test`
+- `flutter test` (includes platform/permission/release-metadata contract
+  tests)
+- Android compile check (`flutter build apk --debug`, unsigned dev
+  artifact) and iOS compile check (`flutter build ios --no-codesign
+  --config-only`) where runners are available. These compile checks are
+  not signed or distributable artifacts.
+
+## Platform support, permissions, and release readiness
+
+Supported Android/iOS ranges, on-device data locations, the exact
+permission set (none for release builds), release metadata, and the
+unsigned-vs-signed artifact boundaries are documented in
+[docs/platform-support.md](docs/platform-support.md). The
+[manual device test checklist](docs/manual-test-checklist.md) must be
+completed with recorded evidence before any release-readiness claim.
+No build, package, or store publication exists yet.
 
 ## Data portability
 

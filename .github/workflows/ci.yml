@@ -30,3 +30,49 @@ jobs:
 
       - name: Unit and widget tests
         run: flutter test
+
+  android-build:
+    # Platform compile check only. Produces an unsigned-for-distribution
+    # debug APK; it is not a release artifact (see docs/platform-support.md).
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK (compile check only)
+        run: flutter build apk --debug
+
+  ios-build:
+    # Platform compile check only. --no-codesign means the output is not
+    # installable or distributable (see docs/platform-support.md).
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS app without code signing (compile check only)
+        run: flutter build ios --no-codesign --config-only
