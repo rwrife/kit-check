@@ -114,15 +114,15 @@ added to the docs in the same change.''',
     });
 
     test('bundle identifier matches the documented release metadata', () {
-      // docs/platform-support.md documents dev.rwrife.kitCheck as the
+      // docs/platform-support.md documents com.infinityball.kitcheck as the
       // iOS bundle identifier. Any change must land with the docs.
       expect(
-        RegExp(r'PRODUCT_BUNDLE_IDENTIFIER = dev\.rwrife\.kitCheck;')
+        RegExp(r'PRODUCT_BUNDLE_IDENTIFIER = com\.infinityball\.kitcheck;')
             .hasMatch(project),
         isTrue,
         reason:
             'docs/platform-support.md documents the iOS bundle id as '
-            'dev.rwrife.kitCheck; update the docs together with any '
+            'com.infinityball.kitcheck; update the docs together with any '
             'identifier change.',
       );
     });

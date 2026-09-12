@@ -77,9 +77,10 @@ explicit user-facing purpose before the permission is added.
   / `CFBundleVersion` via the Flutter build.
 - **Identifiers:** Android `applicationId` and namespace are
   `dev.rwrife.kit_check`; the iOS bundle identifier is
-  `dev.rwrife.kitCheck` (`dev.rwrife.kitCheck.RunnerTests` for the native
-  test target). iOS *distribution* additionally requires an Apple
-  developer account and provisioning profiles before any signed build.
+  `com.infinityball.kitcheck` (`com.infinityball.kitcheck.RunnerTests` for
+  the native test target). The two intentionally differ: the iOS identifier
+  matches the App Store Connect record, while the Android one is unchanged
+  so existing installs are not orphaned.
 - **`publish_to: 'none'`** is set in `pubspec.yaml`; the package is not
   published to pub.dev.
 
@@ -90,7 +91,7 @@ explicit user-facing purpose before the permission is added.
 | `flutter build apk --debug` | Development-only; signed with the shared Android debug key; debug build requests INTERNET for tooling. | Not shippable; debug key is public. |
 | `flutter build apk --release` | Builds with the **debug signing config** (stock scaffold TODO in `build.gradle.kts`). Despite the name, this is an *unsigned-for-distribution* development artifact. | A private keystore, `signingConfigs.release`, uploaded signing key, and Play App Signing or equivalent key custody. |
 | Play Store listing | **Does not exist.** | Signed AAB, data-safety declaration consistent with this document, store listing review. |
-| TestFlight / App Store | **Does not exist.** | Apple developer account, real bundle identifier, provisioning profiles, `flutter build ipa`, App Store Connect review, privacy nutrition labels consistent with this document. |
+| TestFlight / App Store | **Automated.** `.github/workflows/ios-release.yml` archives, signs, and uploads to TestFlight; the `release` lane also submits for review. | Privacy nutrition labels consistent with this document, and App Store review. |
 
 Until an actual signed artifact exists and is verified, no release
 channel may be advertised, and release notes must not claim distribution
@@ -109,7 +110,22 @@ readiness.
    iOS toolchain compiles the app; it is **not** codesigned or
    distributable.
 
+`.github/workflows/ios-release.yml` is separate and does not run on pull
+requests. It is dispatched manually with a lane choice, or by pushing a
+`v*` tag, and it produces a signed iOS build:
+
+1. Selects the newest Xcode on the runner. App Store Connect rejects
+   anything built with an SDK older than iOS 26.
+2. `flutter build ios --release --no-codesign`, then `xcodebuild archive`
+   and `xcodebuild -exportArchive`, both carrying an App Store Connect API
+   key so Xcode can provision the app against the developer portal.
+3. `beta` uploads to TestFlight; `release` also submits for review.
+
+The build number comes from App Store Connect (`latest_testflight_build_number
++ 1`) rather than the Xcode project, because Flutter regenerates
+`$(FLUTTER_BUILD_NUMBER)` on every build.
+
 CI proves the app *compiles* for both platforms and passes tests. CI does
-**not** prove runtime behavior on devices, signed packaging, accessibility
-validation with real screen readers, or store readiness — those remain on
-the manual checklist.
+**not** prove runtime behavior on devices, accessibility validation with
+real screen readers, or store readiness — those remain on the manual
+checklist.

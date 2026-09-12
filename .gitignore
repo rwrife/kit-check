@@ -21,3 +21,13 @@ macos/Pods/
 # User-created exports and backups
 exports/
 backups/
+
+# Signing and release credentials
+*.p8
+*.p12
+*.mobileprovision
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
