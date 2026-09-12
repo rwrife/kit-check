@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="caseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+  </defs>
+  <!-- Artwork scaled to 0.71 and centred so its bounding box fits inside the
+       72dp safe circle of the 108dp adaptive canvas; no drop shadow, because
+       the launcher supplies its own elevation. -->
+  <g transform="translate(512 512) scale(0.71) translate(-512 -505)">
+    <rect x="362" y="180" width="300" height="100" rx="30" fill="#1E293B" stroke="#0F172A" stroke-width="12" />
+    <rect x="412" y="210" width="200" height="70" rx="20" fill="#0F172A" />
+    <rect x="162" y="250" width="700" height="580" rx="60" fill="url(#caseGradient)" />
+    <rect x="212" y="300" width="600" height="480" rx="40" fill="#334155" />
+    <rect x="262" y="230" width="80" height="60" rx="10" fill="#1E293B" />
+    <rect x="682" y="230" width="80" height="60" rx="10" fill="#1E293B" />
+    <path d="M 280 400 L 280 680" stroke="#1E293B" stroke-width="24" stroke-linecap="round" />
+    <path d="M 744 400 L 744 680" stroke="#1E293B" stroke-width="24" stroke-linecap="round" />
+    <path d="M 362 540 L 462 640 L 662 440" stroke="#10B981" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+</svg>
