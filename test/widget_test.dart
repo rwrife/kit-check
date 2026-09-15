@@ -23,6 +23,28 @@ void main() {
     expect(find.textContaining('Account required: false'), findsOneWidget);
   });
 
+  testWidgets('history controls fit a 6.5-inch iPhone viewport', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1242, 2688);
+    tester.view.devicePixelRatio = 3;
+
+    try {
+      await tester.pumpWidget(
+        KitCheckApp(
+          configuration: const AppConfiguration.localOnly(),
+          repository: InMemoryKitCheckRepository(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    } finally {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    }
+  });
+
   testWidgets('accessible pack and return flow stays in one screen', (
     tester,
   ) async {

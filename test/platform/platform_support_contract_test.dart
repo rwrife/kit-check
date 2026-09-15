@@ -97,6 +97,17 @@ update the docs with its user-facing purpose in the same change.''',
       );
     });
 
+    test('targets iPhone only', () {
+      expect(
+        RegExp(r'TARGETED_DEVICE_FAMILY = 1;').allMatches(project).length,
+        3,
+        reason:
+            'docs/platform-support.md documents iPhone-only support; '
+            'all iOS build configurations must target device family 1.',
+      );
+      expect(project.contains('TARGETED_DEVICE_FAMILY = "1,2";'), isFalse);
+    });
+
     test('Info.plist declares no privacy permission prompts', () {
       // Documented: no camera, location, contacts, microphone, photos,
       // Face ID, or background modes.

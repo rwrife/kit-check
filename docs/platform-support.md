@@ -17,7 +17,7 @@ manifests drift from this document.
 | Platform | Documented range | Source of truth |
 | -------- | ---------------- | --------------- |
 | Android | API 24 (Android 7.0 Nougat) through API 36 (`minSdk`/`targetSdk` from Flutter 3.47.x defaults) | `flutter.minSdkVersion` / `flutter.targetSdkVersion` in `android/app/build.gradle.kts` |
-| iOS | iOS 15.0 and later | `IPHONEOS_DEPLOYMENT_TARGET = 15.0` in `ios/Runner.xcodeproj/project.pbxproj` |
+| iOS | iOS 15.0 and later on iPhone; iPad is not supported | `IPHONEOS_DEPLOYMENT_TARGET = 15.0` and `TARGETED_DEVICE_FAMILY = 1` in `ios/Runner.xcodeproj/project.pbxproj` |
 | Flutter SDK | Dart `^3.13.2` (Flutter 3.47.x stable line) | `environment.sdk` in `pubspec.yaml` |
 
 Compatibility is *configured*, not yet *device-verified*: no physical or

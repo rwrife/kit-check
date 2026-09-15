@@ -784,7 +784,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           Semantics(
             label: 'History search controls',
-            child: Row(
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 Semantics(
                   label: 'Clear history filters',
@@ -808,7 +811,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Text('Clear filters'),
                   ),
                 ),
-                const SizedBox(width: 12),
                 Text(
                   query.isActive
                       ? '${matches.length} of ${_allTrips.length} trip(s) match'

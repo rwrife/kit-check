@@ -2,6 +2,11 @@
 
 **Kit Check** is a local-first Android and iOS app for people who reuse packing kits to prepare and return trip-specific gear checklists without accounts.
 
+<p align="center">
+  <img src="docs/screenshots/kit-builder.png" alt="Kit Check reusable kit builder on iPhone" width="300">
+  <img src="docs/screenshots/trip-checklist.png" alt="Kit Check trip packing and return checklist on iPhone" width="300">
+</p>
+
 ## Motivation
 
 Reusable packing lists are useful, but a static list cannot show which items were packed for one specific outing or which have made it back home. Kit Check combines a reusable kit template with a dated trip check-out/check-in record so users can confidently reset their gear between trips.
